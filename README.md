@@ -96,3 +96,6 @@ GitHub Actions にて以下の環境でテストを実施しています。
 このソフトウェアパッケージは、3条項BSDライセンスの下、再頒布および使用が許可されます。詳細は [LICENSE](./LICENSE) を参照してください。
 
 * Copyright (c) 2026 Yuu Koizumi
+このソフトウェアパッケージは、3条項BSDライセンスの下、再頒布および使用が許可されます。詳細は [LICENSE](./LICENSE) を参照してください。
+
+* Copyright (c) 2026 Yuu Koizumi

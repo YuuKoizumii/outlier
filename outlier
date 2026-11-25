@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+# SPDX-FileCopyrightText: 2026 Yuu Koizumi
+# SPDX-License-Identifier: BSD-3-Clause
+
+import argparse
+import math
+import statistics
+import sys
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Filter outliers from numeric data read from standard input."
+    )
+    parser.add_argument(
+        "-s",
+        "--sigma",
+        type=float,
+        default=2.0,
+        help="threshold multiplier for standard deviation (default: 2.0)",
+    )
+    return parser.parse_args()
+
+
+def read_numbers():
+    items = []
+    for line in sys.stdin:
+        for token in line.split():
+            try:
+                val = float(token)
+            except ValueError:
+                print(f"Error: invalid numeric input '{token}'", file=sys.stderr)
+                sys.exit(1)
+            if math.isnan(val) or math.isinf(val):
+                print(f"Error: non-finite value '{token}'", file=sys.stderr)
+                sys.exit(1)
+            items.append((token, val))
+    if not items:
+        print("Error: no numeric input provided", file=sys.stderr)
+        sys.exit(1)
+    return items
+
+
+def main():
+    args = parse_args()
+    if math.isnan(args.sigma) or math.isinf(args.sigma) or args.sigma <= 0:
+        print("Error: sigma must be a positive finite number", file=sys.stderr)
+        sys.exit(1)
+
+    items = read_numbers()
+    values = [v for _, v in items]
+
+    mean = statistics.mean(values)
+    std = statistics.pstdev(values)
+    lower = mean - args.sigma * std
+    upper = mean + args.sigma * std
+
+    for token, val in items:
+        if lower <= val <= upper:
+            print(token)
+
+
+if __name__ == "__main__":
+    main()

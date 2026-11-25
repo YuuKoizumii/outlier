@@ -19,6 +19,20 @@ def parse_args():
         default=2.0,
         help="threshold multiplier for standard deviation (default: 2.0)",
     )
+    parser.add_argument(
+        "--iqr",
+        nargs="?",
+        const=1.5,
+        type=float,
+        default=None,
+        help="use interquartile range method with multiplier K (default: 1.5)",
+    )
+    parser.add_argument(
+        "-v",
+        "--invert",
+        action="store_true",
+        help="output detected outliers instead of inliers",
+    )
     return parser.parse_args()
 
 
@@ -41,22 +55,37 @@ def read_numbers():
     return items
 
 
+def compute_bounds(values, args):
+    if args.iqr is not None:
+        if len(values) < 2:
+            return values[0], values[0]
+        q1, _, q3 = statistics.quantiles(values, n=4, method="inclusive")
+        iqr = q3 - q1
+        return q1 - args.iqr * iqr, q3 + args.iqr * iqr
+
+    mean = statistics.mean(values)
+    std = statistics.pstdev(values)
+    return mean - args.sigma * std, mean + args.sigma * std
+
+
 def main():
     args = parse_args()
     if math.isnan(args.sigma) or math.isinf(args.sigma) or args.sigma <= 0:
         print("Error: sigma must be a positive finite number", file=sys.stderr)
         sys.exit(1)
+    if args.iqr is not None and (
+        math.isnan(args.iqr) or math.isinf(args.iqr) or args.iqr <= 0
+    ):
+        print("Error: iqr multiplier must be a positive finite number", file=sys.stderr)
+        sys.exit(1)
 
     items = read_numbers()
     values = [v for _, v in items]
-
-    mean = statistics.mean(values)
-    std = statistics.pstdev(values)
-    lower = mean - args.sigma * std
-    upper = mean + args.sigma * std
+    lower, upper = compute_bounds(values, args)
 
     for token, val in items:
-        if lower <= val <= upper:
+        is_inlier = lower <= val <= upper
+        if (is_inlier and not args.invert) or (not is_inlier and args.invert):
             print(token)
 
 

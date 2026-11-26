@@ -9,8 +9,8 @@
 以下のコマンドでリポジトリをクローンし、実行権限を付与します。
 
 ```bash
-$ git clone [https://github.com/YuuKoizumii/outlier.git](https://github.com/YuuKoizumii/outlier.git)
-$cd outlier
+$ git clone https://github.com/YuuKoizumii/outlier.git
+$ cd outlier
 $ chmod +x outlier
 ```
 
